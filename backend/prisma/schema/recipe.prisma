@@ -1,0 +1,32 @@
+model Recipe {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  instructions String
+  prepTime     Int
+  cookTime     Int
+  servings     Int
+  difficulty   String
+  category     String?
+  cuisine      String?
+  tags         String[]
+  images       String[]
+  // 👇 Relation to User
+  userId String @db.ObjectId
+  user   User   @relation("UserRecipes", fields: [userId], references: [id])
+
+  ingredients  Ingredient[] @relation("RecipeIngredients")
+  createdAt   DateTime @default(now())
+  @@unique([title, userId])
+}
+
+model Ingredient {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  quantity Float
+  unit     String
+  notes    String?
+
+  recipeId String @db.ObjectId
+  recipe   Recipe @relation("RecipeIngredients", fields: [recipeId], references: [id])
+}
