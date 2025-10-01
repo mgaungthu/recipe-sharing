@@ -20,7 +20,7 @@ export class CreateRecipeDto {
 
   @IsOptional()
   @IsString()
-  instructions: string = 'No instructions yet'; // optional with default
+  instructions!: 'No instructions yet'; // optional with default
 
   @IsArray()
   @ValidateNested({ each: true })
