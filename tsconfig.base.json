@@ -16,6 +16,9 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@my-nx/source"]
+    "customConditions": ["@my-nx/source"],  
+    "paths": {
+        "@my-nx/share-types": ["share-types/src/index.ts"]
+      }
   }
 }

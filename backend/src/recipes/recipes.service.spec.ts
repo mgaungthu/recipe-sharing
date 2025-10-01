@@ -4,8 +4,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Recipe } from '@prisma/client';
-import { Category, Cuisine, Difficulty } from '../../../share-types/src/lib/recipe';
-
+import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
 
   type MockPrismaService = {
   recipe: {
@@ -85,7 +84,7 @@ describe('RecipesService', () => {
 
   describe('findAll', () => {
     it('should return all recipes', async () => {
-      prisma.recipe.findMany.mockResolvedValue([{ id: '1', title: 'Soup' }] as any);
+      prisma.recipe.findMany.mockResolvedValue([{ id: '1', title: 'Soup' }] as Recipe[]);
       const result = await service.findAll();
       expect(result).toEqual([{ id: '1', title: 'Soup' }]);
     });
@@ -93,7 +92,7 @@ describe('RecipesService', () => {
 
   describe('findOne', () => {
     it('should return a recipe by id', async () => {
-      prisma.recipe.findUnique.mockResolvedValue({ id: '1', title: 'Salad' } as any);
+      prisma.recipe.findUnique.mockResolvedValue({ id: '1', title: 'Salad' } as Recipe);
       const result = await service.findOne('1');
       expect(prisma.recipe.findUnique).toHaveBeenCalledWith({
         where: { id: '1' },
@@ -131,7 +130,7 @@ describe('RecipesService', () => {
 
   describe('remove', () => {
     it('should delete a recipe', async () => {
-      prisma.recipe.delete.mockResolvedValue({ id: '1', title: 'Deleted Recipe' } as any);
+      prisma.recipe.delete.mockResolvedValue({ id: '1', title: 'Deleted Recipe' } as Recipe);
       const result = await service.remove('1');
       expect(prisma.recipe.delete).toHaveBeenCalledWith({
         where: { id: '1' },
