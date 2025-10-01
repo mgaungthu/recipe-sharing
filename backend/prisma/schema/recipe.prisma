@@ -11,13 +11,16 @@ model Recipe {
   cuisine      String?
   tags         String[]
   images       String[]
+
   // 👇 Relation to User
   userId String @db.ObjectId
   user   User   @relation("UserRecipes", fields: [userId], references: [id])
 
   ingredients  Ingredient[] @relation("RecipeIngredients")
   createdAt   DateTime @default(now())
-  @@unique([title, userId])
+
+  // Unique composite key for ownership
+  @@unique([id, userId])
 }
 
 model Ingredient {

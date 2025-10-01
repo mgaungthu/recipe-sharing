@@ -6,7 +6,6 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: AuthService;
   let prismaService: PrismaService;
 
   beforeEach(async () => {
@@ -34,7 +33,6 @@ describe('AuthController', () => {
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService);
     prismaService = module.get<PrismaService>(PrismaService);
   });
 

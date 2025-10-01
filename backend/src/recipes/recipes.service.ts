@@ -81,7 +81,7 @@ export class RecipesService {
     });
   }
 
-  remove(id: string) {
+  remove(id: string, userId: string) {
     return this.prisma.recipe.delete({
       where: { id },
       include: { ingredients: true },

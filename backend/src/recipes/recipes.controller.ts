@@ -43,6 +43,6 @@ export class RecipesController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req: any) {
-    return this.recipesService.remove(id);
+  return this.recipesService.remove(id, req.user.id);
   }
 }
