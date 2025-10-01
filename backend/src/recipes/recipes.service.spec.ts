@@ -16,7 +16,7 @@ import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
   };
 };
 
-type RecipeEntity = Prisma.RecipeGetPayload<{}>;
+type RecipeEntity = Prisma.RecipeGetPayload<{ select: any }>;
 
 describe('RecipesService', () => {
   let service: RecipesService;
