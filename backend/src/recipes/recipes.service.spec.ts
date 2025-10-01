@@ -3,7 +3,7 @@ import { RecipesService } from './recipes.service';
 import { PrismaService } from '../prisma.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { Recipe } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
 
   type MockPrismaService = {
@@ -15,6 +15,8 @@ import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
     delete: jest.Mock;
   };
 };
+
+type RecipeEntity = Prisma.RecipeGetPayload<{}>;
 
 describe('RecipesService', () => {
   let service: RecipesService;
@@ -67,7 +69,7 @@ describe('RecipesService', () => {
       };
 
       const expected = { id: '1', ...dto, ingredients: dto.ingredients };
-      prisma.recipe.create.mockResolvedValue(expected as unknown as Recipe);
+      prisma.recipe.create.mockResolvedValue(expected as unknown as RecipeEntity);
 
       const result = await service.create(dto, 'user-1');
       expect(prisma.recipe.create).toHaveBeenCalledWith(
@@ -84,7 +86,7 @@ describe('RecipesService', () => {
 
   describe('findAll', () => {
     it('should return all recipes', async () => {
-      prisma.recipe.findMany.mockResolvedValue([{ id: '1', title: 'Soup' }] as Recipe[]);
+      prisma.recipe.findMany.mockResolvedValue([{ id: '1', title: 'Soup' }] as RecipeEntity[]);
       const result = await service.findAll();
       expect(result).toEqual([{ id: '1', title: 'Soup' }]);
     });
@@ -92,7 +94,7 @@ describe('RecipesService', () => {
 
   describe('findOne', () => {
     it('should return a recipe by id', async () => {
-      prisma.recipe.findUnique.mockResolvedValue({ id: '1', title: 'Salad' } as Recipe);
+      prisma.recipe.findUnique.mockResolvedValue({ id: '1', title: 'Salad' } as RecipeEntity);
       const result = await service.findOne('1');
       expect(prisma.recipe.findUnique).toHaveBeenCalledWith({
         where: { id: '1' },
@@ -130,7 +132,7 @@ describe('RecipesService', () => {
 
   describe('remove', () => {
     it('should delete a recipe', async () => {
-      prisma.recipe.delete.mockResolvedValue({ id: '1', title: 'Deleted Recipe' } as Recipe);
+      prisma.recipe.delete.mockResolvedValue({ id: '1', title: 'Deleted Recipe' } as RecipeEntity);
       const result = await service.remove('1');
       expect(prisma.recipe.delete).toHaveBeenCalledWith({
         where: { id: '1' },
