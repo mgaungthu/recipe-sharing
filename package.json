@@ -68,7 +68,7 @@
     "frontend",
     "backend",
     "backend-e2e",
-    "shared-types"
+    "share-types"
   ],
   "dependencies": {
     "@nestjs/common": "^11.0.0",
