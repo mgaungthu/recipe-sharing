@@ -3,7 +3,7 @@ import { RecipesService } from './recipes.service';
 import { PrismaService } from '../prisma.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { Recipe } from '@prisma/client';
+import type { Recipe } from '@prisma/client';
 import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
 
   type MockPrismaService = {
