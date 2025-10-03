@@ -5,7 +5,7 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
 
-  type MockPrismaService = {
+type MockPrismaService = {
   recipe: {
     create: jest.Mock;
     findMany: jest.Mock;
@@ -18,8 +18,6 @@ import { Category, Cuisine, Difficulty } from '@my-nx/share-types';
 describe('RecipesService', () => {
   let service: RecipesService;
   let prisma: MockPrismaService;
-
-  
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -75,7 +73,7 @@ describe('RecipesService', () => {
             title: 'Pasta',
             user: { connect: { id: 'user-1' } },
           }),
-        }),
+        })
       );
       expect(result).toEqual(expected);
     });
@@ -129,8 +127,11 @@ describe('RecipesService', () => {
 
   describe('remove', () => {
     it('should delete a recipe', async () => {
-      prisma.recipe.delete.mockResolvedValue({ id: '1', title: 'Deleted Recipe' });
-      const result = await service.remove('1','title');
+      prisma.recipe.delete.mockResolvedValue({
+        id: '1',
+        title: 'Deleted Recipe',
+      });
+      const result = await service.remove('1', 'title');
       expect(prisma.recipe.delete).toHaveBeenCalledWith({
         where: { id: '1' },
         include: { ingredients: true },
