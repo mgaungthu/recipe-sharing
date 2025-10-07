@@ -1,20 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { isRequired, isValidEmail, isStrongPassword, isMatchingPasswords, isValidUsername } from "@/utils/validators";
+import { toast } from "react-hot-toast";
 import Link from "next/link";
 import Layout from "../components/Layout";
 import { colors } from "../theme";
+import { socket } from "@/utils/socket";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [emailTaken, setEmailTaken] = useState(false);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (isValidEmail(value)) {
+      socket.emit('checkEmail', value);
+    } else {
+       setEmailTaken(false);
+    }
+  };
+
+  useEffect(() => {
+    socket.connect();
+    
+    const handleEmailStatus = (status: { email: string; exists: boolean }) => {
+      if (status.email === email) {
+        if (status.exists) {
+          setEmailTaken(true);
+        } else {
+          setEmailTaken(false);
+        }
+      }
+    };
+
+    socket.on("emailStatus", handleEmailStatus);
+    socket.on("connect", () => console.log("✅ Connected to WS server"));
+    socket.on("disconnect", () => console.log("❌ Disconnected from WS server"));
+    socket.on("connect_error", (err) => console.error("⚠️ WS Error:", err.message));
+
+    return () => {
+      socket.off("emailStatus", handleEmailStatus);
+      socket.disconnect();
+    };
+  }, [isValidEmail(email)]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+    // Validation
+    if (!isRequired(name)) {
+      toast.error("Name is required.");
+      return;
+    }
+    if (!isValidUsername(name)) {
+      toast.error("Username must be at least 3 characters and contain only letters, numbers, underscores, or periods.");
+      return;
+    }
+    if (!isRequired(email)) {
+      toast.error("Email is required.");
+      return;
+    }
+    if (emailTaken) {
+      toast.error("Email already exists.");
+      return;
+    }
+    if (!isRequired(password)) {
+      toast.error("Password is required.");
+      return;
+    }
+    if (!isRequired(confirmPassword)) {
+      toast.error("Please confirm your password.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (!isStrongPassword(password)) {
+      toast.error("Password is not strong enough.");
+      return;
+    }
+    if (!isMatchingPasswords(password, confirmPassword)) {
+      toast.error("Passwords do not match.");
       return;
     }
     // TODO: connect to backend API
@@ -29,7 +100,7 @@ export default function SignupPage() {
             className="text-2xl font-bold text-center mb-6"
             style={{ color: colors.primary }}
           >
-            Create Your Account ✨
+            Create Your Account
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -56,11 +127,16 @@ export default function SignupPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2"
                 style={{ borderColor: colors.primary }}
               />
+              {emailTaken && (
+                <p className="text-red-600 text-sm mt-1">
+                  This email is already taken.
+                </p>
+              )}
             </div>
 
             {/* Password */}

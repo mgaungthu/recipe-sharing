@@ -1,6 +1,8 @@
 import './global.css';
 
 import { Lora } from 'next/font/google';
+import { ClientProviders } from './providers';
+import { Toaster } from 'react-hot-toast';
 
 const lora = Lora({
   subsets: ['latin'],
@@ -20,7 +22,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={lora.variable}>
-      <body>{children}</body>
+      <body>
+        <ClientProviders>
+          {children}
+           <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+        }}
+      />
+        </ClientProviders>
+      </body>
     </html>
   );
 }
