@@ -14,6 +14,11 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../coverage/frontend',
   testEnvironment: 'jsdom',
+  forceExit: true,
+  detectOpenHandles: false,
+  clearMocks: true,
+  restoreMocks: true,
+  resetMocks: true,
 };
 
 export default createJestConfig(config);

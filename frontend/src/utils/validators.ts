@@ -8,9 +8,10 @@ export const isValidEmail = (email: string): boolean => {
 
 /** Check if password meets strength requirement */
 export const isStrongPassword = (password: string): boolean => {
-  // Minimum 8 chars, at least one letter and one number
-  const strongPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-  return strongPassword.test(password);
+  // Must be at least 8 chars, include uppercase, lowercase, number, and special char
+  const strongRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-+=~`])[A-Za-z\d!@#$%^&*(),.?":{}|<>_\-+=~`]{8,}$/;
+  return strongRegex.test(password.trim());
 };
 
 /** Generic required field checker */

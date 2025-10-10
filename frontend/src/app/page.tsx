@@ -42,7 +42,7 @@ export default function HomePage() {
           Create Recipe
         </Link>
       </section>
-
+        
       {/* Featured Categories */}
       <section className="container mx-auto py-12 px-6">
         <h2 className="font-sans text-2xl font-bold mb-6">Explore Categories</h2>
