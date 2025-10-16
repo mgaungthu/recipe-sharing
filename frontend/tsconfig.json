@@ -44,7 +44,7 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/middleware.ts", "src/middleware.test.ts"  ],
   "exclude": [
     "out-tsc",
     "dist",

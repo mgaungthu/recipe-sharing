@@ -6,8 +6,9 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value;
   const { pathname } = req.nextUrl;
 
+
   // 🚫 Protect recipe creation
-  if (pathname.startsWith(ROUTES.RECIPE.CREATE) && !token) {
+  if (pathname.startsWith('/recipe/create') && !token) {
     const loginUrl = new URL(ROUTES.AUTH.LOGIN, req.url);
     loginUrl.searchParams.set('redirect', pathname);
     const res = NextResponse.redirect(loginUrl);
@@ -17,7 +18,6 @@ export function middleware(req: NextRequest) {
         maxAge: 1,
       });
     }
-    return res;
     return res;
   }
 

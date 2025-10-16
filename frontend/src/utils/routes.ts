@@ -6,9 +6,9 @@ export const ROUTES = {
     REGISTER: "/register",
   },
   RECIPE: {
-    LIST: "/recipe",
-    CREATE: "/recipe/create",
-    DETAILS: (id: string) => `/recipe/${id}`,
+    LIST: "/recipes",
+    CREATE: "/recipes",
+    DETAILS: (id: string) => `/recipes/${id}`,
   },
   DASHBOARD: "/dashboard",
 };

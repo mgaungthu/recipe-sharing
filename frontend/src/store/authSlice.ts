@@ -35,9 +35,6 @@ export const login = createAsyncThunk(
   ) => {
     try {
       const res = await axios.post('/auth/login', { email, password });
-      const { access_token } = res.data;
-
-      Cookies.set('token', access_token, { path: '/', expires: 7 });
 
       return res.data; // NestJS returns { access_token, user }
     } catch (err: any) {

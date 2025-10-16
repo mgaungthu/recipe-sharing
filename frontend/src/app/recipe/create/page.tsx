@@ -1,27 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
 import Layout from "../../components/Layout";
 import { colors } from "../../theme";
+import axiosInstance from "@/lib/axios"; 
+import { ROUTES } from "@/utils/routes";
 
 export default function CreateRecipePage() {
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    instructions: "",
-    prepTime: 0,
-    cookTime: 0,
-    servings: 1,
-    difficulty: "",
-    category: "",
-    cuisine: "",
+    title: "Spaghetti Carbonara",
+    description:
+      "A classic Italian pasta dish with creamy egg sauce, pancetta, and parmesan.",
+    instructions:
+      "1. Cook pasta until al dente.\n2. Fry pancetta until crispy.\n3. Mix eggs and cheese in a bowl.\n4. Toss pasta with pancetta, then stir in egg mixture.\n5. Serve with extra parmesan and black pepper.",
+    prepTime: 15,
+    cookTime: 20,
+    servings: 4,
+    difficulty: "Medium",
+    category: "Dinner",
+    cuisine: "Italian",
   });
 
-  const [images, setImages] = useState<string[]>([""]);
-  const [tags, setTags] = useState<string[]>([""]);
-  const [ingredients, setIngredients] = useState<string[]>([""]);
+  const [images, setImages] = useState<string[]>([
+    "https://example.com/carbonara1.jpg",
+  ]);
+  const [tags, setTags] = useState<string[]>(["pasta", "italian"]);
+  const [ingredients, setIngredients] = useState([
+    { name: "Spaghetti", quantity: 400, unit: "g", notes: "" },
+    { name: "Pancetta", quantity: 150, unit: "g", notes: "" },
+    { name: "Eggs", quantity: 2, unit: "pcs", notes: "" },
+    { name: "Parmesan cheese", quantity: 50, unit: "g", notes: "Grated" },
+  ]);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -29,11 +44,10 @@ export default function CreateRecipePage() {
     }));
   };
 
-  // Handlers for dynamic arrays
   const handleArrayChange = (
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    setter: React.Dispatch<React.SetStateAction<any[]>>,
     index: number,
-    value: string
+    value: any
   ) => {
     setter((prev) => {
       const newArr = [...prev];
@@ -42,27 +56,57 @@ export default function CreateRecipePage() {
     });
   };
 
-  const handleAddField = (setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    setter((prev) => [...prev, ""]);
+  const handleAddField = (setter: React.Dispatch<React.SetStateAction<any[]>>, initial: any = "") => {
+    setter((prev) => [...prev, initial]);
   };
 
   const handleRemoveField = (
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    setter: React.Dispatch<React.SetStateAction<any[]>>,
     index: number
   ) => {
     setter((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: connect to backend API
-    const finalData = {
-      ...formData,
-      images: images.filter((img) => img.trim() !== ""),
-      tags: tags.filter((tag) => tag.trim() !== ""),
-      ingredients: ingredients.filter((ing) => ing.trim() !== ""),
+    setLoading(true);
+
+    const cleanImages = images.filter((img) => img.trim() !== "");
+    const cleanTags = tags.filter((tag) => tag.trim() !== "");
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      instructions: formData.instructions,
+      prepTime: Number(formData.prepTime),
+      cookTime: Number(formData.cookTime),
+      servings: Number(formData.servings),
+      difficulty: formData.difficulty || "Easy",
+      category: formData.category,
+      cuisine: formData.cuisine,
+      images: cleanImages,
+      tags: cleanTags,
+      ingredients: ingredients.map((i) => ({
+        name: i.name,
+        quantity: Number(i.quantity),
+        unit: i.unit,
+        notes: i.notes || "",
+      })),
     };
-    console.log("Submit Recipe:", finalData);
+
+    try {
+      const { data } = await axiosInstance.post(ROUTES.RECIPE.CREATE, payload);
+      alert("✅ Recipe created successfully!");
+      console.log("Recipe created:", data);
+    } catch (error: any) {
+      console.error("❌ Create recipe error:", error);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Unknown error occurred.";
+      alert("Failed to create recipe: " + message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -188,11 +232,12 @@ export default function CreateRecipePage() {
                 style={{ borderColor: colors.primary }}
               >
                 <option value="">Select category</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
                 <option value="Dessert">Dessert</option>
-                <option value="Main Course">Main Course</option>
-                <option value="Appetizer">Appetizer</option>
-                <option value="Salad">Salad</option>
-                <option value="Soup">Soup</option>
+                <option value="Drink">Drink</option>
               </select>
             </div>
 
@@ -223,7 +268,7 @@ export default function CreateRecipePage() {
                 Images (URLs)
               </label>
               {images.map((img, index) => (
-                <div key={index} className="flex mb-2 gap-2">
+                <div key={index} className="flex mb-2 gap-2 items-center">
                   <input
                     type="text"
                     value={img}
@@ -236,19 +281,21 @@ export default function CreateRecipePage() {
                     type="button"
                     onClick={() => handleRemoveField(setImages, index)}
                     disabled={images.length === 1}
-                    className="px-3 py-2 bg-red-500 text-white rounded-md disabled:opacity-50"
+                    className="flex items-center justify-center w-10 h-10 bg-red-500 text-white rounded-md disabled:opacity-50"
                   >
-                    Remove
+                    <FaTrash />
                   </button>
+                  {index === images.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleAddField(setImages)}
+                      className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-md"
+                    >
+                      <FaPlus />
+                    </button>
+                  )}
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={() => handleAddField(setImages)}
-                className="px-4 py-2 bg-green-500 text-white rounded-md"
-              >
-                Add Image
-              </button>
             </div>
 
             {/* Tags */}
@@ -257,7 +304,7 @@ export default function CreateRecipePage() {
                 Tags
               </label>
               {tags.map((tag, index) => (
-                <div key={index} className="flex mb-2 gap-2">
+                <div key={index} className="flex mb-2 gap-2 items-center">
                   <input
                     type="text"
                     value={tag}
@@ -270,19 +317,21 @@ export default function CreateRecipePage() {
                     type="button"
                     onClick={() => handleRemoveField(setTags, index)}
                     disabled={tags.length === 1}
-                    className="px-3 py-2 bg-red-500 text-white rounded-md disabled:opacity-50"
+                    className="flex items-center justify-center w-10 h-10 bg-red-500 text-white rounded-md disabled:opacity-50"
                   >
-                    Remove
+                    <FaTrash />
                   </button>
+                  {index === tags.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleAddField(setTags)}
+                      className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-md"
+                    >
+                      <FaPlus />
+                    </button>
+                  )}
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={() => handleAddField(setTags)}
-                className="px-4 py-2 bg-green-500 text-white rounded-md"
-              >
-                Add Tag
-              </button>
             </div>
 
             {/* Ingredients */}
@@ -290,33 +339,93 @@ export default function CreateRecipePage() {
               <label className="block mb-2 font-medium" style={{ color: colors.textPrimary }}>
                 Ingredients
               </label>
-              {ingredients.map((ing, index) => (
-                <div key={index} className="flex mb-2 gap-2">
-                  <textarea
-                    value={ing}
-                    onChange={(e) => handleArrayChange(setIngredients, index, e.target.value)}
-                    rows={2}
-                    placeholder="1 cup flour, 2 eggs..."
-                    className="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2"
-                    style={{ borderColor: colors.primary }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveField(setIngredients, index)}
-                    disabled={ingredients.length === 1}
-                    className="px-3 py-2 bg-red-500 text-white rounded-md disabled:opacity-50"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => handleAddField(setIngredients)}
-                className="px-4 py-2 bg-green-500 text-white rounded-md"
-              >
-                Add Ingredient
-              </button>
+              <div className="space-y-2">
+                {ingredients.map((ing, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={ing.name}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          setIngredients,
+                          index,
+                          { ...ing, name: e.target.value }
+                        )
+                      }
+                      placeholder="Ingredient name"
+                      className="px-2 py-1 border rounded-md w-[30%] focus:outline-none focus:ring-2"
+                      style={{ borderColor: colors.primary }}
+                    />
+                    <input
+                      type="number"
+                      value={ing.quantity}
+                      min={0}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          setIngredients,
+                          index,
+                          { ...ing, quantity: e.target.value }
+                        )
+                      }
+                      placeholder="Qty"
+                      className="px-2 py-1 border rounded-md w-[15%] focus:outline-none focus:ring-2"
+                      style={{ borderColor: colors.primary }}
+                    />
+                    <input
+                      type="text"
+                      value={ing.unit}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          setIngredients,
+                          index,
+                          { ...ing, unit: e.target.value }
+                        )
+                      }
+                      placeholder="Unit"
+                      className="px-2 py-1 border rounded-md w-[15%] focus:outline-none focus:ring-2"
+                      style={{ borderColor: colors.primary }}
+                    />
+                    <input
+                      type="text"
+                      value={ing.notes}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          setIngredients,
+                          index,
+                          { ...ing, notes: e.target.value }
+                        )
+                      }
+                      placeholder="Notes"
+                      className="px-2 py-1 border rounded-md w-[25%] focus:outline-none focus:ring-2"
+                      style={{ borderColor: colors.primary }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveField(setIngredients, index)}
+                      disabled={ingredients.length === 1}
+                      className="flex items-center justify-center w-10 h-10 bg-red-500 text-white rounded-md disabled:opacity-50"
+                    >
+                      <FaTrash />
+                    </button>
+                    {index === ingredients.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleAddField(setIngredients, {
+                            name: "",
+                            quantity: "",
+                            unit: "",
+                            notes: "",
+                          })
+                        }
+                        className="flex items-center justify-center w-10 h-10 bg-green-500 text-white rounded-md"
+                      >
+                        <FaPlus />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Instructions */}
@@ -338,24 +447,16 @@ export default function CreateRecipePage() {
             {/* Submit */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full py-2 rounded-md font-semibold text-white transition"
-              style={{ backgroundColor: colors.primary }}
+              style={{
+                backgroundColor: loading ? "#ccc" : colors.primary,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
             >
-              Save Recipe
+              {loading ? "Saving..." : "Save Recipe"}
             </button>
           </form>
-
-          {/* Future AI Generator */}
-          {/* <div className="mt-8 text-center">
-            <button
-              type="button"
-              className="px-6 py-2 rounded-md font-semibold text-white"
-              style={{ backgroundColor: colors.secondary }}
-              onClick={() => alert("AI Recipe Generator Coming Soon!")}
-            >
-              Generate with AI 🤖
-            </button>
-          </div> */}
         </div>
       </div>
     </Layout>

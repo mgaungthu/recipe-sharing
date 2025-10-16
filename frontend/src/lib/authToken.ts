@@ -1,8 +1,13 @@
-// frontend/src/lib/authToken.ts
-let token: string | null = null;
+import Cookies from "js-cookie";
 
 export const setAuthToken = (value: string | null) => {
-  token = value;
+  if (value) {
+    Cookies.set("token", value, { path: "/", sameSite: "Lax" });
+  } else {
+    Cookies.remove("token");
+  }
 };
 
-export const getAuthToken = () => token;
+export const getAuthToken = () => {
+  return Cookies.get("token") || null;
+};
